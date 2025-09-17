@@ -1,0 +1,9 @@
+ale-py
+gymnasium
+gymnasium[other]
+numpy
+matplotlib
+tqdm
+pygame
+opencv-python
+ipykernel
