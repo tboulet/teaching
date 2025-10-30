@@ -2,6 +2,7 @@
 Connect Four game implementation.
 """
 import numpy as np
+import random
 from typing import List, Tuple, Optional
 from mcts.games.base_game import GameState, Player
 
@@ -28,9 +29,9 @@ class ConnectFour(GameState):
         super().__init__(visual)
 
     def reset(self) -> None:
-        """Reset the game to initial state."""
+        """Reset the game to initial state with a randomly chosen starting player."""
         self.board = np.zeros((self.rows, self.cols), dtype=int)  # 0 = empty, 1 = Player1, 2 = Player2
-        self.current_player = Player.PLAYER1
+        self.current_player = random.choice([Player.PLAYER1, Player.PLAYER2])
 
     def get_legal_actions(self) -> List[int]:
         """Return list of columns that are not full."""

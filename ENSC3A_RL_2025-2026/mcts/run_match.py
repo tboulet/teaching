@@ -112,9 +112,6 @@ def run_match(
                         if game.visual:
                             print(f"{'=' * 50}\n")
 
-        # Disable visualization after last game
-        if game.visual:
-            game.visual = False
 
     # Calculate win rate
     total_decisive_games = results['agent1_wins'] + results['agent2_wins']
@@ -132,17 +129,24 @@ if __name__ == "__main__":
     from mcts.games.connect_four import ConnectFour
     from mcts.agents.random_agent import RandomAgent
     from mcts.agents.minimax_agent import MinimaxAgent
-
+    from mcts.agents.mcts_agent import MCTSAgent
+    from mcts.agents.human_agent import HumanAgent
+    
     print("=" * 60)
     print("Game Framework: Running Matches Between Agents")
     print("=" * 60)
 
-    game1 = ConnectFour(visual=False)
-    agent1 = MinimaxAgent(name="Minimax-D9", max_depth=9)
-    agent2 = MinimaxAgent(name="Minimax-D3", max_depth=1)
+    game = ConnectFour(visual=False)
+    agents = [
+        MinimaxAgent(name="Minimax-D9", max_depth=9),
+        RandomAgent(name="Random"),
+        # HumanAgent(name="Human"),
+        # MCTSAgent(name="MCTS", num_simulations=1000),
+    ]
+    agent1, agent2 = agents[0], agents[1]
 
     results = run_match(
-        game=game1,
+        game=game,
         agent1=agent1,
         agent2=agent2,
         num_episodes=20,
