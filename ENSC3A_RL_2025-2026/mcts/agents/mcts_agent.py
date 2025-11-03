@@ -125,7 +125,6 @@ class MCTSNode:
         ...
 
         # 3. Cloner l'état du jeu et appliquer l'action
-        #    HINT: Utilisez self.state.clone() puis next_state.step(action)
         next_state = ...
         ...
 
@@ -156,20 +155,12 @@ class MCTSNode:
         # TODO: Implémenter la simulation (rollout aléatoire)
 
         # 1. Cloner l'état pour ne pas modifier le nœud
-        #    HINT: simulation_state = self.state.clone()
         simulation_state = ...
 
         # 2. Mémoriser le joueur initial (celui dont c'est le tour à ce nœud)
         initial_player = simulation_state.get_current_player()
 
         # 3. Jouer aléatoirement jusqu'à atteindre un état terminal
-        #    HINT: Utilisez une boucle while not simulation_state.is_terminal()
-        #    HINT: Dans la boucle:
-        #          - Récupérer les actions légales
-        #          - Choisir une action aléatoire
-        #          - Appliquer l'action avec step()
-        #          - Si done=True, retourner la récompense appropriée
-
         while not simulation_state.is_terminal():
             legal_actions = ...
             action = ...

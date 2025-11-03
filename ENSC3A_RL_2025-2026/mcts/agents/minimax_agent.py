@@ -123,6 +123,8 @@ class MinimaxAgent(Agent):
 
                 if done:
                     # Terminal state - reward is from opponent's perspective
+                    # Since this is good for opponent, it's bad for us (negate it)
+                    # And we're minimizing from our perspective, so we want low values
                     value = -reward
                 else:
                     value = self._minimax(cloned_state, depth + 1, alpha, beta, True)
