@@ -16,6 +16,8 @@ mcts/
 │   ├── human_agent.py     # Joueur humain (CLI)
 │   ├── minimax_agent.py   # Minimax avec alpha-beta
 │   └── mcts_agent.py      # MCTS (À IMPLÉMENTER)
+├── test_mcts_student.py   # Tests progressifs de votre MCTS
+├── examples.py        # Menu d'exemples de matchs
 └── run_match.py       # Script principal pour lancer des matchs
 ```
 
@@ -26,11 +28,14 @@ mcts/
 ### Lancer un Match
 
 ```bash
-# Lancer les exemples fournis
-python -m mcts.run_match
-
 # Tester votre implémentation de MCTS (tests progressifs)
 python -m mcts.test_mcts_student
+
+# Menu d'exemples : matchs entre agents, MCTS vs Minimax, jouer contre MCTS ou Minimax
+python -m mcts.examples
+
+# Un match configurable (modifiez le __main__ de run_match.py)
+python -m mcts.run_match
 ```
 
 ### Utilisation Programmatique
