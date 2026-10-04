@@ -1,50 +1,53 @@
 # Reinforcement Learning course
 
-This repository contains the code and materials for the practical work of the Reinforcement Learning course for "Parcours IA - ENSC 2025/2026".
+This repository contains the code and materials for the practical work of the Reinforcement Learning course for "Parcours IA - ENSC 2026/2027".
 
-# Installation
+# Base installation
 
-The code is verified to work with python 3.11, windows and with the ``uv`` package manager. You might consider creating a new virtual environment for this project.
+You need Python 3.10 to 3.12 (the code is tested with Python 3.12.3 on Linux). We recommend creating a virtual environment for this project.
 
-To install `uv`, you can run:
-
+Create the virtual environment (the command name depends on your system):
 ```bash
-pip install uv
+python3 -m venv venv   # On Linux or MacOS
+python -m venv venv    # On Windows (or: py -m venv venv)
 ```
 
-Then, create and activate a virtual environment (replace `3.11` with your desired Python version if needed):
+On Ubuntu/Debian, if this fails with `ensurepip is not available`, first run `sudo apt install python3-venv`.
+
+Then activate it:
 ```bash
-uv venv --python 3.11 # Or if not using uv: python -m venv venv
-venv\Scripts\activate # On Windows
-source venv/bin/activate # On Linux or MacOS
+source venv/bin/activate   # On Linux or MacOS
+venv\Scripts\activate      # On Windows
 ```
 
-Then, install the dependencies:
+On Windows PowerShell, if activation fails with "running scripts is disabled on this system", run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then activate again (or use `cmd` instead of PowerShell).
 
+Once the virtual environment is activated, `python` and `pip` refer to the environment's ones on every system. Install the dependencies:
 ```bash
-uv pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 # Torch installation
 
-(only required for 2nd part of the TP)
+(only required for the DQN part of the notebook)
 
-Install torch following the instructions on https://pytorch.org/get-started/locally/ (the command depends on your system and whether you have a CUDA-capable GPU).
-By default and for example, on Windows with uv and CUDA 12.6, you can run:
-
+The CPU version of torch is sufficient for this TP (the neural network is small) and is a much smaller download:
 ```bash
-uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+python -m pip install torch --index-url https://download.pytorch.org/whl/cpu   # On Linux or Windows
+python -m pip install torch                                                    # On MacOS
 ```
 
-To verify torch installation, you can run:
+If you prefer to use a NVIDIA GPU, pick the install command on https://pytorch.org/get-started/locally/ instead (for example with CUDA 12.6: `python -m pip install torch --index-url https://download.pytorch.org/whl/cu126`).
 
+To verify torch installation, you can run:
 ```bash
-python ENSC3A_RL_2025-2026\verify_installation.py  # On Windows
-python ENSC3A_RL_2025-2026/verify_installation.py  # On Linux or MacOS
+python -c "import torch; print(torch.__version__, 'CUDA:', torch.cuda.is_available())"
 ```
 
 # Usage
 
-The notebook `ENSC3A_RL_2025-2026/Deep_RL.py` contains the practical work for the course. You can run it using Jupyter Notebook on VS Code or on Colab [here](https://colab.research.google.com/drive/13iiiH74SSlf9ExoJHT0ooI39aJdIVugM).
+The notebook `ENSC3A_RL_2026-2027/notebook.ipynb` contains the practical work for the course. Open it in VS Code (with the Jupyter extension) and select the `venv` kernel in the top-right corner.
 
+The MCTS practical work is in `ENSC3A_RL_2026-2027/mcts/`, see its [README](ENSC3A_RL_2026-2027/mcts/README.md).
 
+If you have installation issues, you can do the TP on this [Google Colab notebook]( https://colab.research.google.com/drive/1FGXJO-G9f2HUHPdWsg3eRszc8Vtj71-K?usp=sharing). Open it and "Fichier → Enregistrer une copie dans Drive" to get your own copy. 

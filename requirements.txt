@@ -1,9 +1,6 @@
-ale-py
-gymnasium
-gymnasium[other]
+gymnasium>=1.0
 numpy
 matplotlib
 tqdm
 pygame
-opencv-python
 ipykernel

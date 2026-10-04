@@ -1,6 +1,7 @@
 venv*
+venv/
 private/
-~$slides.pptx
+ENSC3A_RL_2026-2027/notebook_correction.ipynb
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
