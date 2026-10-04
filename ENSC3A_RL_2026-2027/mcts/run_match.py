@@ -85,6 +85,9 @@ def run_match(
 
             # Check for game end
             if done:
+                agent1.game_over(game)
+                agent2.game_over(game)
+
                 if reward == 1.0:
                     # Current player wins
                     winner = current_player

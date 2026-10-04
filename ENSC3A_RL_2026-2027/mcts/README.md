@@ -13,11 +13,12 @@ mcts/
 ├── agents/            # Implémentations des algorithmes
 │   ├── base_agent.py  # Classe abstraite Agent
 │   ├── random_agent.py    # Agent aléatoire
-│   ├── human_agent.py     # Joueur humain (CLI)
+│   ├── human_agent.py     # Joueur humain (fenêtre ou terminal)
 │   ├── minimax_agent.py   # Minimax avec alpha-beta
 │   └── mcts_agent.py      # MCTS (À IMPLÉMENTER)
 ├── test_mcts_student.py   # Tests progressifs de votre MCTS
 ├── examples.py        # Menu d'exemples de matchs
+├── gui.py             # Fenêtre pygame utilisée par HumanAgent
 └── run_match.py       # Script principal pour lancer des matchs
 ```
 
@@ -96,10 +97,11 @@ agent = RandomAgent(name="Random")
 ```
 
 ### HumanAgent
-Demande au joueur humain de saisir une action via le terminal.
+Le joueur humain clique sur le plateau dans une fenêtre (ou, avec `gui=False`, saisit son action dans le terminal). Sans écran disponible, il bascule automatiquement sur le terminal.
 
 ```python
-agent = HumanAgent(name="Human")
+agent = HumanAgent(name="Human")             # fenêtre
+agent = HumanAgent(name="Human", gui=False)  # terminal
 ```
 
 ### MinimaxAgent

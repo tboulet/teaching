@@ -42,3 +42,11 @@ class Agent(ABC):
         Useful for agents that maintain statistics or tree structures.
         """
         pass
+
+    def game_over(self, game_state: 'GameState') -> None:
+        """
+        Optional: Called with the final state when a game ends.
+
+        Useful for agents that display the game (e.g. a human playing in a window).
+        """
+        pass

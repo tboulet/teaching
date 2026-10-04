@@ -2,273 +2,135 @@
 Exemples d'utilisation du framework MCTS.
 
 Ce fichier contient différents exemples pour comprendre
-comment utiliser le framework.
+comment utiliser le framework : on choisit d'abord les adversaires, puis le jeu.
 """
 
 from mcts.games import TicTacToe, ConnectFour
-from mcts.agents import RandomAgent, MinimaxAgent, HumanAgent, MCTSAgent
+from mcts.games.base_game import GameState
+from mcts.agents import Agent, RandomAgent, MinimaxAgent, HumanAgent, MCTSAgent
 from mcts.run_match import run_match
 
+MCTS_SIMULATIONS = 1000
+NUM_EPISODES = 10  # parties par match entre agents (une seule partie contre un humain)
 
-def example_1_random_vs_random():
-    """Exemple 1: Deux agents aléatoires s'affrontent au TicTacToe."""
+
+def choose_game() -> type:
+    """Demande le jeu à utiliser et renvoie sa classe."""
+    choice = input("Jeu ? 1. TicTacToe  2. ConnectFour : ").strip()
+    return ConnectFour if choice == '2' else TicTacToe
+
+
+def minimax_depth(game: GameState) -> int:
+    """Profondeur de recherche de Minimax selon le jeu."""
+    # Sans heuristique, Minimax évalue à 0 toute position non terminale à la profondeur max :
+    # jeu parfait au TicTacToe (profondeur 9 = toute la partie), mais au ConnectFour
+    # il ne voit que les victoires à moins de max_depth coups.
+    return 9 if isinstance(game, TicTacToe) else 4
+
+
+def make_agent(kind: str, game: GameState) -> Agent:
+    """Crée un agent ("Human", "Random", "Minimax" ou "MCTS") réglé pour le jeu."""
+    if kind == "Human":
+        return HumanAgent(name="You")
+    if kind == "Random":
+        return RandomAgent(name="Random")
+    if kind == "Minimax":
+        depth = minimax_depth(game)
+        return MinimaxAgent(name=f"Minimax-D{depth}", max_depth=depth)
+    return MCTSAgent(name=f"MCTS-{MCTS_SIMULATIONS}", num_simulations=MCTS_SIMULATIONS)
+
+
+def results_line(agent1: Agent, agent2: Agent, results: dict) -> str:
+    """Résumé d'un match sur une ligne."""
+    return (f"{agent1.name}: {results['agent1_wins']}W | Draws: {results['draws']} | "
+            f"{agent2.name}: {results['agent2_wins']}W")
+
+
+def play(kind1: str, kind2: str, game: GameState) -> None:
+    """Match entre deux types d'agents : une partie contre un humain, sinon NUM_EPISODES parties."""
     print("\n" + "="*60)
-    print("Exemple 1: Random vs Random (TicTacToe)")
+    print(f"{kind1} vs {kind2} ({type(game).__name__})")
     print("="*60)
 
-    game = TicTacToe(visual=False)
-    agent1 = RandomAgent(name="Random-1")
-    agent2 = RandomAgent(name="Random-2")
+    human = "Human" in (kind1, kind2)
+    game.visual = human  # contre un humain, le plateau est aussi affiché dans le terminal
+    agent1 = make_agent(kind1, game)
+    agent2 = make_agent(kind2, game)
 
     results = run_match(
         game=game,
         agent1=agent1,
         agent2=agent2,
-        num_episodes=10,
+        num_episodes=1 if human else NUM_EPISODES,
         verbose=True,
-        render_last_game=True
+        render_last_game=not human  # visualiser la dernière partie
     )
 
-    print(f"\nRésultats finaux: {results}")
+    print(f"\nRésultats finaux: {results_line(agent1, agent2, results)}")
 
 
-def example_2_minimax_vs_random_tictactoe():
-    """Exemple 2: Minimax vs Random au TicTacToe."""
+def minimax_vs_minimax(game: GameState) -> None:
+    """Minimax de différentes profondeurs s'affrontent."""
+    depth = minimax_depth(game)
     print("\n" + "="*60)
-    print("Exemple 2: Minimax vs Random (TicTacToe)")
+    print(f"Minimax-D{depth} vs Minimax-D2 ({type(game).__name__})")
     print("="*60)
 
-    game = TicTacToe(visual=False)
-    agent1 = MinimaxAgent(name="Minimax", max_depth=9)
-    agent2 = RandomAgent(name="Random")
-
-    results = run_match(
-        game=game,
-        agent1=agent1,
-        agent2=agent2,
-        num_episodes=10,
-        verbose=True,
-        render_last_game=True
-    )
-
-    print(f"\nRésultats finaux: {results}")
-
-
-def example_3_minimax_vs_random_connect4():
-    """Exemple 3: Minimax vs Random au Connect Four."""
-    print("\n" + "="*60)
-    print("Exemple 3: Minimax vs Random (ConnectFour)")
-    print("="*60)
-
-    game = ConnectFour(visual=False)
-    # Note: depth=3 car ConnectFour est plus complexe que TicTacToe
-    agent1 = MinimaxAgent(name="Minimax-D3", max_depth=3)
-    agent2 = RandomAgent(name="Random")
-
-    results = run_match(
-        game=game,
-        agent1=agent1,
-        agent2=agent2,
-        num_episodes=10,
-        verbose=True,
-        render_last_game=True
-    )
-
-    print(f"\nRésultats finaux: {results}")
-
-
-def example_4_minimax_vs_minimax():
-    """Exemple 4: Minimax de différentes profondeurs s'affrontent."""
-    print("\n" + "="*60)
-    print("Exemple 4: Minimax-D3 vs Minimax-D2 (ConnectFour)")
-    print("="*60)
-
-    game = ConnectFour(visual=False)
-    agent1 = MinimaxAgent(name="Minimax-D3", max_depth=3)
+    agent1 = MinimaxAgent(name=f"Minimax-D{depth}", max_depth=depth)
     agent2 = MinimaxAgent(name="Minimax-D2", max_depth=2)
-
     results = run_match(
         game=game,
         agent1=agent1,
         agent2=agent2,
-        num_episodes=10,
+        num_episodes=NUM_EPISODES,
         verbose=True,
         render_last_game=True
     )
 
-    print(f"\nRésultats finaux: {results}")
+    print(f"\nRésultats finaux: {results_line(agent1, agent2, results)}")
 
 
-def example_5_human_vs_random():
-    """Exemple 5: Joueur humain vs Random (TicTacToe)."""
+def tournament(game: GameState) -> None:
+    """Chaque paire d'agents parmi Random, Minimax et MCTS s'affronte."""
     print("\n" + "="*60)
-    print("Exemple 5: Human vs Random (TicTacToe)")
-    print("="*60)
-    print("Vous allez jouer contre un agent aléatoire.")
-    print("Entrez le numéro de l'action quand c'est votre tour.\n")
-
-    game = TicTacToe(visual=True)  # visual=True pour voir le plateau
-    agent1 = HumanAgent(name="You")
-    agent2 = RandomAgent(name="Random")
-
-    results = run_match(
-        game=game,
-        agent1=agent1,
-        agent2=agent2,
-        num_episodes=1,  # Une seule partie
-        verbose=True,
-        render_last_game=False  # Déjà en visual=True
-    )
-
-    print(f"\nRésultats finaux: {results}")
-
-
-def example_6_comparing_agents():
-    """Exemple 6: Comparer plusieurs agents sur un même jeu."""
-    print("\n" + "="*60)
-    print("Exemple 6: Comparaison de plusieurs agents")
+    print(f"Tournoi : Random, Minimax et MCTS ({type(game).__name__})")
     print("="*60)
 
-    game = TicTacToe(visual=False)
-    agents = [
-        RandomAgent(name="Random"),
-        MinimaxAgent(name="Minimax-D7", max_depth=7),
-        MinimaxAgent(name="Minimax-D9", max_depth=9),
-    ]
+    agents = [make_agent(kind, game) for kind in ("Random", "Minimax", "MCTS")]
 
     # Faire jouer chaque paire d'agents
     for i, agent1 in enumerate(agents):
-        for j, agent2 in enumerate(agents):
-            if i >= j:  # Éviter les doublons et les matchs contre soi-même
-                continue
-
-            print(f"\n{'-'*60}")
-            print(f"{agent1.name} vs {agent2.name}")
-            print(f"{'-'*60}")
-
+        for agent2 in agents[i + 1:]:
             results = run_match(
                 game=game,
                 agent1=agent1,
                 agent2=agent2,
-                num_episodes=10,
+                num_episodes=NUM_EPISODES,
                 verbose=False,
                 render_last_game=False
             )
 
-            print(f"Résultats: {agent1.name}: {results['agent1_wins']}W | "
-                  f"Draws: {results['draws']} | {agent2.name}: {results['agent2_wins']}W")
-
-
-def example_7_mcts():
-    """Exemple 7: Test de MCTS sur différents jeux."""
-    print("\n" + "="*60)
-    print("Exemple 7: Monte Carlo Tree Search (MCTS)")
-    print("="*60)
-
-    # Test sur TicTacToe
-    print("\n[TicTacToe]")
-    print("-"*60)
-    game1 = TicTacToe(visual=False)
-
-    print("MCTS(500 sims) vs Random:")
-    mcts1 = MCTSAgent(name="MCTS-500", num_simulations=500)
-    random1 = RandomAgent(name="Random")
-    results1 = run_match(game1, mcts1, random1, 10, verbose=False, render_last_game=False)
-    print(f"  {results1['agent1_wins']}W - {results1['draws']}D - {results1['agent2_wins']}L  "
-          f"(win rate: {results1['agent1_win_rate']:.0%})")
-
-    print("\nMCTS(500 sims) vs Minimax-D7:")
-    mcts2 = MCTSAgent(name="MCTS-500", num_simulations=500)
-    minimax1 = MinimaxAgent(name="Minimax-D7", max_depth=7)
-    results2 = run_match(game1, mcts2, minimax1, 10, verbose=False, render_last_game=False)
-    print(f"  {results2['agent1_wins']}W - {results2['draws']}D - {results2['agent2_wins']}L")
-
-    # Test sur ConnectFour
-    print("\n[ConnectFour]")
-    print("-"*60)
-    game2 = ConnectFour(visual=False)
-
-    print("MCTS(300 sims) vs Random:")
-    mcts3 = MCTSAgent(name="MCTS-300", num_simulations=300)
-    random2 = RandomAgent(name="Random")
-    results3 = run_match(game2, mcts3, random2, 10, verbose=False, render_last_game=True)
-    print(f"  {results3['agent1_wins']}W - {results3['draws']}D - {results3['agent2_wins']}L  "
-          f"(win rate: {results3['agent1_win_rate']:.0%})")
-
-    print(f"\nRésultats finaux:")
-    print(f"  TicTacToe: MCTS montre de bonnes performances")
-    print(f"  ConnectFour: MCTS excelle avec {results3['agent1_win_rate']:.0%} de victoires!")
-
-
-def example_8_mcts_vs_minimax():
-    """Exemple 8: MCTS vs Minimax sur les deux jeux."""
-    print("\n" + "="*60)
-    print("Exemple 8: MCTS vs Minimax")
-    print("="*60)
-
-    print("\n[TicTacToe] MCTS(1000 sims) vs Minimax-D9 (jeu parfait):")
-    results1 = run_match(TicTacToe(visual=False), MCTSAgent(name="MCTS-1000", num_simulations=1000),
-                         MinimaxAgent(name="Minimax-D9", max_depth=9), 10, verbose=False, render_last_game=False)
-    print(f"  {results1['agent1_wins']}W - {results1['draws']}D - {results1['agent2_wins']}L  "
-          f"(attendu : surtout des matchs nuls)")
-
-    # Sans heuristique, Minimax évalue à 0 toute position non terminale à la profondeur max :
-    # au ConnectFour, il ne voit que les victoires à moins de max_depth coups.
-    print("\n[ConnectFour] MCTS(1000 sims) vs Minimax-D4:")
-    results2 = run_match(ConnectFour(visual=False), MCTSAgent(name="MCTS-1000", num_simulations=1000),
-                         MinimaxAgent(name="Minimax-D4", max_depth=4), 10, verbose=False, render_last_game=True)
-    print(f"  {results2['agent1_wins']}W - {results2['draws']}D - {results2['agent2_wins']}L")
-
-
-def _choose_game():
-    """Demande le jeu à utiliser pour une partie contre un humain (plateau affiché)."""
-    choice = input("Jeu ? 1. TicTacToe  2. ConnectFour : ").strip()
-    return ConnectFour(visual=True) if choice == '2' else TicTacToe(visual=True)
-
-
-def example_9_human_vs_mcts():
-    """Exemple 9: Jouer contre votre MCTS."""
-    print("\n" + "="*60)
-    print("Exemple 9: Human vs MCTS")
-    print("="*60)
-
-    game = _choose_game()
-    results = run_match(game, HumanAgent(name="You"), MCTSAgent(name="MCTS-1000", num_simulations=1000),
-                        num_episodes=1, verbose=True, render_last_game=False)
-
-    print(f"\nRésultats finaux: {results}")
-
-
-def example_10_human_vs_minimax():
-    """Exemple 10: Jouer contre Minimax."""
-    print("\n" + "="*60)
-    print("Exemple 10: Human vs Minimax")
-    print("="*60)
-
-    game = _choose_game()
-    max_depth = 9 if isinstance(game, TicTacToe) else 4
-    results = run_match(game, HumanAgent(name="You"), MinimaxAgent(name=f"Minimax-D{max_depth}", max_depth=max_depth),
-                        num_episodes=1, verbose=True, render_last_game=False)
-
-    print(f"\nRésultats finaux: {results}")
+            print(f"{agent1.name} vs {agent2.name}: {results_line(agent1, agent2, results)}")
 
 
 if __name__ == "__main__":
-    """Menu principal pour choisir un exemple."""
+    """Menu principal : choisir les adversaires, puis le jeu."""
 
+    matches = [
+        ("Human", "Random"),
+        ("Human", "Minimax"),
+        ("Human", "MCTS"),
+        ("Random", "Minimax"),
+        ("Random", "MCTS"),
+        ("Minimax", "MCTS"),
+    ]
     examples = {
-        '1': ('Random vs Random (TicTacToe)', example_1_random_vs_random),
-        '2': ('Minimax vs Random (TicTacToe)', example_2_minimax_vs_random_tictactoe),
-        '3': ('Minimax vs Random (ConnectFour)', example_3_minimax_vs_random_connect4),
-        '4': ('Minimax-D3 vs Minimax-D2 (ConnectFour)', example_4_minimax_vs_minimax),
-        '5': ('Human vs Random (TicTacToe)', example_5_human_vs_random),
-        '6': ('Comparaison de plusieurs agents', example_6_comparing_agents),
-        '7': ('MCTS - Monte Carlo Tree Search', example_7_mcts),
-        '8': ('MCTS vs Minimax (TicTacToe et ConnectFour)', example_8_mcts_vs_minimax),
-        '9': ('Human vs MCTS', example_9_human_vs_mcts),
-        '10': ('Human vs Minimax', example_10_human_vs_minimax),
+        str(i): (f"{kind1} vs {kind2}", lambda game, k1=kind1, k2=kind2: play(k1, k2, game))
+        for i, (kind1, kind2) in enumerate(matches, start=1)
     }
-    human_examples = {'5', '9', '10'}
+    examples['7'] = ('Minimax vs Minimax (profondeurs différentes)', minimax_vs_minimax)
+    examples['8'] = ('Tournoi : Random, Minimax et MCTS', tournament)
+    human_examples = {'1', '2', '3'}
 
     print("\n" + "="*60)
     print("Framework MCTS - Exemples")
@@ -281,12 +143,12 @@ if __name__ == "__main__":
     choice = input("\nVotre choix: ").strip()
 
     if choice == '0':
-        # Exécuter tous les exemples sauf le Human
+        game_class = choose_game()
         for key, (description, func) in examples.items():
             if key not in human_examples:
-                func()
+                func(game_class(visual=False))
     elif choice in examples:
         _, func = examples[choice]
-        func()
+        func(choose_game()(visual=False))
     else:
         print("Choix invalide!")
