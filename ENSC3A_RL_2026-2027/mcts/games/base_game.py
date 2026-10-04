@@ -41,7 +41,7 @@ class GameState(ABC):
         Return list of legal action indices.
 
         Returns:
-            List of integers representing valid actions.
+            List of integers representing valid actions (empty once the game is over).
         """
         pass
 
@@ -54,7 +54,7 @@ class GameState(ABC):
             action: The action to execute (must be in get_legal_actions()).
 
         Returns:
-            reward: +1 if current player wins, -1 if loses, 0 if draw, None if ongoing
+            reward: +1 if the player who just played wins, 0 if draw, None if ongoing
             done: True if game is terminal (win/loss/draw)
         """
         pass
@@ -66,6 +66,16 @@ class GameState(ABC):
 
         Returns:
             The current player (Player.PLAYER1 or Player.PLAYER2).
+        """
+        pass
+
+    @abstractmethod
+    def get_winner(self) -> Optional[Player]:
+        """
+        Return the winner of the game.
+
+        Returns:
+            The winning player, or None if the game is ongoing or ended in a draw.
         """
         pass
 
@@ -94,7 +104,7 @@ class GameState(ABC):
         Check if game is over.
 
         Returns:
-            True if no legal actions remain.
+            True if the game is over (win or draw).
         """
         return len(self.get_legal_actions()) == 0
 

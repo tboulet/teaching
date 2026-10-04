@@ -3,7 +3,8 @@ Tests progressifs pour valider l'implémentation MCTS des étudiants.
 
 Exécutez ce fichier pour tester votre implémentation étape par étape.
 """
-from mcts.games import TicTacToe, ConnectFour
+import numpy as np
+from mcts.games import TicTacToe, ConnectFour, Player
 from mcts.agents import MCTSAgent, RandomAgent, MinimaxAgent
 from mcts.agents.mcts_agent import MCTSNode
 from mcts.run_match import run_match
@@ -243,10 +244,49 @@ def test_7_mcts_agent():
     return True
 
 
-def test_8_performance():
-    """Test 8: Performance contre Random."""
+def test_8_tactics():
+    """Test 8: Coups tactiques (gagner en un coup, bloquer l'adversaire)."""
     print("\n" + "="*70)
-    print("TEST 8: Performance de MCTS vs Random")
+    print("TEST 8: Coups tactiques")
+    print("="*70)
+
+    def position(board, player):
+        game = TicTacToe(visual=False)
+        game.board = np.array(board)
+        game.current_player = player
+        return game
+
+    # X joue et gagne en 2 (O menace aussi de gagner en 5) :  X X . / O O . / . . .
+    # O joue et doit bloquer X en 2 :                         X X . / O . . / . . .
+    positions = [
+        ("gagner en un coup", [1, 1, 0, 2, 2, 0, 0, 0, 0], Player.PLAYER1, 2),
+        ("bloquer l'adversaire", [1, 1, 0, 2, 0, 0, 0, 0, 0], Player.PLAYER2, 2),
+    ]
+
+    try:
+        for name, board, player, expected_action in positions:
+            hits = sum(
+                MCTSAgent(name="MCTS", num_simulations=200).select_action(position(board, player)) == expected_action
+                for _ in range(10)
+            )
+            print(f"  - {name}: action {expected_action} choisie {hits}/10 fois")
+            assert hits >= 9, f"MCTS devrait {name} (action {expected_action})"
+
+        print("✓ MCTS joue les coups évidents")
+
+    except Exception as e:
+        print(f"✗ MCTS rate un coup évident: {e}")
+        print("   Vérifiez is_terminal() et simulate() sur un nœud déjà terminal (partie gagnée)")
+        return False
+
+    print("\n✅ Test 8 RÉUSSI!\n")
+    return True
+
+
+def test_9_performance():
+    """Test 9: Performance contre Random."""
+    print("\n" + "="*70)
+    print("TEST 9: Performance de MCTS vs Random")
     print("="*70)
 
     print("Ce test peut prendre ~30 secondes...\n")
@@ -278,7 +318,7 @@ def test_8_performance():
         print(f"✗ Erreur pendant les matchs: {e}")
         return False
 
-    print("\n✅ Test 8 RÉUSSI!\n")
+    print("\n✅ Test 9 RÉUSSI!\n")
     return True
 
 
@@ -296,7 +336,8 @@ def run_all_tests():
         test_5_ucb1,
         test_6_best_action,
         test_7_mcts_agent,
-        test_8_performance,
+        test_8_tactics,
+        test_9_performance,
     ]
 
     passed = 0

@@ -29,15 +29,19 @@ class TicTacToe(GameState):
         """
         self.board = None
         self.current_player = None
+        self.winner = None
         super().__init__(visual)
 
     def reset(self) -> None:
         """Reset the game to initial state with a randomly chosen starting player."""
         self.board = np.zeros(9, dtype=int)  # 0 = empty, 1 = Player1, 2 = Player2
         self.current_player = random.choice([Player.PLAYER1, Player.PLAYER2])
+        self.winner = None
 
     def get_legal_actions(self) -> List[int]:
-        """Return list of empty positions."""
+        """Return list of empty positions (empty list if the game is over)."""
+        if self.winner is not None:
+            return []
         return [i for i in range(9) if self.board[i] == 0]
 
     def step(self, action: int) -> Tuple[Optional[float], bool]:
@@ -48,7 +52,7 @@ class TicTacToe(GameState):
             action: Position to place mark (0-8).
 
         Returns:
-            reward: +1 if current player wins, -1 if loses, 0 if draw, None if ongoing
+            reward: +1 if the player who just played wins, 0 if draw, None if ongoing
             done: True if game is terminal
         """
         if action not in self.get_legal_actions():
@@ -57,30 +61,34 @@ class TicTacToe(GameState):
         # Place mark
         self.board[action] = self.current_player.value
 
-        # Check for win
-        winner = self._check_winner()
-        if winner is not None:
-            reward = 1.0 if winner == self.current_player else -1.0
-            return reward, True
+        # Check for win or draw
+        if self._check_winner() is not None:
+            self.winner = self.current_player
+            reward, done = 1.0, True
+        elif len(self.get_legal_actions()) == 0:
+            reward, done = 0.0, True
+        else:
+            reward, done = None, False
 
-        # Check for draw
-        if len(self.get_legal_actions()) == 0:
-            return 0.0, True
-
-        # Switch player
+        # Switch player, also after the last move: get_current_player() is always the player to move
         self.current_player = Player.PLAYER2 if self.current_player == Player.PLAYER1 else Player.PLAYER1
 
-        return None, False
+        return reward, done
 
     def get_current_player(self) -> Player:
         """Return the current player."""
         return self.current_player
+
+    def get_winner(self) -> Optional[Player]:
+        """Return the winner, or None if the game is ongoing or a draw."""
+        return self.winner
 
     def clone(self) -> 'TicTacToe':
         """Return a deep copy of the game state."""
         new_game = TicTacToe(visual=False)  # Don't carry over visual mode to clones
         new_game.board = self.board.copy()
         new_game.current_player = self.current_player
+        new_game.winner = self.winner
         return new_game
 
     def render(self) -> str:

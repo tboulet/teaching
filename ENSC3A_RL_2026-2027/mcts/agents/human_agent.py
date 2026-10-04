@@ -43,4 +43,4 @@ class HumanAgent(Agent):
                 print("Invalid input! Please enter a number.")
             except (KeyboardInterrupt, EOFError):
                 print("\nGame interrupted by user.")
-                raise
+                exit(0)

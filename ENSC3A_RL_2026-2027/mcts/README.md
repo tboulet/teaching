@@ -21,16 +21,16 @@ mcts/
 
 ## Utilisation
 
-### Lancer un Match
+<!> Les commandes se run depuis `ENSC3A_RL_2026-2027`.
 
-Depuis le répertoire racine du projet :
+### Lancer un Match
 
 ```bash
 # Lancer les exemples fournis
 python -m mcts.run_match
 
-# Ou directement
-python mcts/run_match.py
+# Tester votre implémentation de MCTS (tests progressifs)
+python -m mcts.test_mcts_student
 ```
 
 ### Utilisation Programmatique
@@ -66,8 +66,10 @@ Chaque jeu doit implémenter :
 
 - `reset()` : Réinitialiser le jeu
 - `get_legal_actions()` : Retourner la liste des actions légales
-- `step(action)` : Exécuter une action et retourner (reward, done)
-- `get_current_player()` : Retourner le joueur courant
+- `step(action)` : Exécuter une action, passer au joueur suivant et retourner (reward, done)
+- `get_current_player()` : Retourner le joueur dont c'est le tour
+- `get_winner()` : Retourner le gagnant (None si partie en cours ou match nul)
+- `is_terminal()` : Indiquer si la partie est terminée (fourni par la classe de base)
 - `clone()` : Retourner une copie du jeu
 - `render()` : Retourner une représentation textuelle
 - `display()` : Afficher le jeu si visual=True
@@ -103,7 +105,8 @@ agent = MinimaxAgent(name="Minimax", max_depth=5)
 ```
 
 ### MCTSAgent (À IMPLÉMENTER)
-À vous de l'implémenter !
+
+À vous de l'implémenter ! Lisez `mcts/agents/mcts_agent.py` et completez les classes MCTSNode et MCTSAgent.
 
 ## Tests
 

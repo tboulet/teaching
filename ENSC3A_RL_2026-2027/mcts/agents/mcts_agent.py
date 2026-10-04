@@ -42,7 +42,7 @@ class MCTSNode:
 
         # Statistics
         self.visits = 0  # Number of times this node was visited
-        self.value = 0.0  # Total value accumulated (sum of rewards)
+        self.value = 0.0  # Sum of rewards, from the perspective of the player to move at this node
 
     def is_fully_expanded(self) -> bool:
         """
@@ -63,7 +63,7 @@ class MCTSNode:
             True if the game is over at this node.
         """
         # ---- <VOTRE CODE ICI> ----
-        # TODO: Vérifier s'il n'y a plus d'actions légales
+        # TODO: Vérifier si la partie est terminée dans l'état de ce nœud
         pass
         # --------------------------
 
@@ -148,8 +148,8 @@ class MCTSNode:
         action is selected until the game ends.
 
         Returns:
-            The reward from the perspective of the player who just moved
-            to reach this node (i.e., the PREVIOUS player).
+            The result from the perspective of the player to move at this node:
+            +1 if they win, -1 if they lose, 0 for a draw.
         """
         # ---- <VOTRE CODE ICI> ----
         # TODO: Implémenter la simulation (rollout aléatoire)
@@ -164,20 +164,14 @@ class MCTSNode:
         while not simulation_state.is_terminal():
             legal_actions = ...
             action = ...
-            reward, done = ...
+            ...
 
-            if done:
-                # Le jeu est terminé
-                # La récompense est du point de vue du joueur qui vient de jouer
-                # Nous devons la retourner du point de vue du joueur initial
-                # HINT: Utilisez simulation_state.get_current_player() et comparez avec initial_player
-                
-                ...
-                
-                return ...
-            
-        # Si on arrive ici (ne devrait pas arriver), retourner 0
-        return 0.0
+        # 4. Retourner le résultat du point de vue du joueur initial :
+        #    +1 s'il a gagné, -1 s'il a perdu, 0 en cas de match nul
+        # HINT: Utilisez simulation_state.get_winner()
+        winner = ...
+        ...
+        return ...
         # --------------------------
 
     def backpropagate(self, reward: float) -> None:
@@ -192,7 +186,7 @@ class MCTSNode:
 
         Args:
             reward: The reward from the simulation, from the perspective of
-                   the player who played to reach this node.
+                   the player to move at this node.
         """
         # ---- <VOTRE CODE ICI> ----
         # TODO: Implémenter la backpropagation

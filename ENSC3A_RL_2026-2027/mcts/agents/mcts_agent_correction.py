@@ -40,7 +40,7 @@ class MCTSNode:
 
         # Statistics
         self.visits = 0  # Number of times this node was visited
-        self.value = 0.0  # Total value accumulated (sum of rewards)
+        self.value = 0.0  # Sum of rewards, from the perspective of the player to move at this node
 
     def is_fully_expanded(self) -> bool:
         """
@@ -58,7 +58,7 @@ class MCTSNode:
         Returns:
             True if the game is over at this node.
         """
-        return len(self.state.get_legal_actions()) == 0
+        return self.state.is_terminal()
 
     def best_child(self, exploration_constant: float) -> 'MCTSNode':
         """
@@ -129,47 +129,26 @@ class MCTSNode:
         action is selected until the game ends.
 
         Returns:
-            The reward from the perspective of the player who just moved
-            to reach this node (i.e., the PREVIOUS player).
+            The result from the perspective of the player to move at this node:
+            +1 if they win, -1 if they lose, 0 for a draw.
         """
         # Clone the state to avoid modifying the node's state
         simulation_state = self.state.clone()
 
-        # Remember whose turn it was when we entered this node
-        # The reward will be from the perspective of the player who JUST played
-        # to reach this node (the parent's player)
+        # Remember whose turn it is at this node
         initial_player = simulation_state.get_current_player()
 
-        # Perform random rollout until terminal state
+        # Perform random rollout until terminal state (no iteration if this node is already terminal)
         while not simulation_state.is_terminal():
             legal_actions = simulation_state.get_legal_actions()
             action = random.choice(legal_actions)
-            reward, done = simulation_state.step(action)
+            simulation_state.step(action)
 
-            if done:
-                # Game ended during rollout
-                # reward is from perspective of the player who just moved
-                # We need to return it from the perspective of initial_player
-
-                # If the current player (who just moved) is the initial player,
-                # return reward as-is
-                # Otherwise, negate it (zero-sum game)
-                current_player = simulation_state.get_current_player()
-
-                # Note: After a terminal move, current_player has NOT changed yet
-                # So we need to check the player who made the terminal move
-                # In our implementation, step() switches player BEFORE returning
-                # So if done=True, the current_player is the NEXT player (who didn't move)
-
-                # The initial_player is the player whose turn it is at THIS node
-                # So if current_player != initial_player, we need to negate
-                if current_player != initial_player:
-                    return -reward
-                else:
-                    return reward
-
-        # If we somehow reach here (shouldn't happen), return 0
-        return 0.0
+        # Result from the perspective of initial_player
+        winner = simulation_state.get_winner()
+        if winner is None:
+            return 0.0
+        return 1.0 if winner == initial_player else -1.0
 
     def backpropagate(self, reward: float) -> None:
         """
@@ -183,7 +162,7 @@ class MCTSNode:
 
         Args:
             reward: The reward from the simulation, from the perspective of
-                   the player who played to reach this node.
+                   the player to move at this node.
         """
         node = self
         current_reward = reward
@@ -192,7 +171,7 @@ class MCTSNode:
             # Update visit count
             node.visits += 1
 
-            # Update value (from the perspective of the player who moved to reach this node)
+            # Update value (from the perspective of the player to move at this node)
             node.value += current_reward
 
             # Move to parent and negate reward (zero-sum game)
