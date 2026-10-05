@@ -51,3 +51,7 @@ The notebook `ENSC3A_RL_2026-2027/notebook.ipynb` contains the practical work fo
 The MCTS practical work is in `ENSC3A_RL_2026-2027/mcts/`, see its [README](ENSC3A_RL_2026-2027/mcts/README.md).
 
 If you have installation issues, you can do the TP on this [Google Colab notebook]( https://colab.research.google.com/drive/1FGXJO-G9f2HUHPdWsg3eRszc8Vtj71-K?usp=sharing). Open it and "Fichier → Enregistrer une copie dans Drive" to get your own copy. 
+
+# Slides
+
+Slides are available online [here](https://docs.google.com/presentation/d/1fm1MsA0bVIVUpecPmUhCXDm9suZoZvhSdnuN3q-tKFQ/edit?usp=sharing).
